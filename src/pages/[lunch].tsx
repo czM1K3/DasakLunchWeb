@@ -1,5 +1,7 @@
 import { GetServerSideProps } from "next";
-import React, { FC } from "react";
+import Head from "next/head";
+import Link from "next/link";
+import React, { FC, useMemo } from "react";
 import { Lunch } from "../types/lunch";
 import { Review } from "../types/review";
 import { supabase } from "../utils/supabase";
@@ -10,26 +12,33 @@ type LunchProps = {
 };
 
 const Lunch: FC<LunchProps> = ({ reviews, lunch }) => {
+	const title = useMemo(() => lunch.name.charAt(0).toUpperCase() + lunch.name.slice(1), [lunch]);
 	return (
-		<div>
-			<h1>{lunch.name}</h1>
+		<>
+			<Head>
+				<title>{title}</title>
+			</Head>
+			<Link href="/" passHref>
+				<a>
+					<button>Zpět</button>
+				</a>
+			</Link>
+			<h1>{title}</h1>
 			<div>
-				{reviews.map(review => (
-					<div key={review.id}>
-						<h2>
-							{review.content}
-						</h2>
-						<img src={review.image_url} />
-					</div>
+				{reviews.map((review, i) => (
+					<figure key={review.id}>
+						<img src={review.image_url} alt={`image-${i}`} />
+						<figcaption>{review.content}</figcaption>
+					</figure>
 				))}
 			</div>
-		</div>
+		</>
 	);
 };
 
 export const getServerSideProps: GetServerSideProps<LunchProps> = async ({ query }) => {
 	const { lunch } = query;
-	if (typeof(lunch) !== "string") return { notFound: true };
+	if (typeof (lunch) !== "string") return { notFound: true };
 	const num = parseInt(lunch);
 	if (!num) return { notFound: true };
 
